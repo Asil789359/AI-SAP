@@ -1,0 +1,15 @@
+{
+  "name": "ai-erp-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=web",
+    "dev:api": "npm run start:dev --workspace=api",
+    "dev:live": "cd apps/live-data-service && .\\venv\\Scripts\\python.exe main.py",
+    "build:web": "npm run build --workspace=web",
+    "build:api": "npm run build --workspace=api"
+  }
+}

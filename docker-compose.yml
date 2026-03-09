@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Nginx Gateway (Load Balancer & Proxy)
+  nginx:
+    image: nginx:latest
+    container_name: erp_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+      - api
+      - live-feed
+    networks:
+      - erp_network
+    restart: always
+
+  # Next.js Frontend (Enterprise Dashboard)
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    container_name: erp_web
+    expose:
+      - "3000"
+    networks:
+      - erp_network
+    deploy:
+      replicas: 3 # Scale to 3+ for 100k users
+    restart: always
+
+  # NestJS Backend (SAP S/4HANA Engine)
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    container_name: erp_api
+    expose:
+      - "3001"
+    networks:
+      - erp_network
+    deploy:
+      replicas: 5 # Higher replicas for heavy computational API load
+    restart: always
+
+  # FastAPI Live Feed (Market Intelligence)
+  live-feed:
+    build:
+      context: .
+      dockerfile: ./apps/live-data-service/Dockerfile
+    container_name: erp_live_feed
+    expose:
+      - "8004"
+    networks:
+      - erp_network
+    restart: always
+
+networks:
+  erp_network:
+    driver: bridge
